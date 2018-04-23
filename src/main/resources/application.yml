@@ -1,2 +1,9 @@
 application:
   name: starter
+
+googleTranslateClient:
+  connectionTimeout: 2000
+  socketTimeout: 2000
+  maxConnectionsPerRoute: 5
+  maxConnections: 10
+  url: 'https://translate.googleapis.com/translate_a/single'
