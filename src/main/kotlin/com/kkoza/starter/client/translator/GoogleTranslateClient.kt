@@ -3,14 +3,14 @@ package com.kkoza.starter.client.translator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.google.common.net.HttpHeaders
 import com.kkoza.starter.translator.CountryCode
+import com.sun.istack.internal.logging.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.util.UriBuilder
 import reactor.core.publisher.Mono
-import java.net.URI
+import kotlin.math.log
 
 
 @Component
@@ -20,6 +20,7 @@ class GoogleTranslateClient(
 ) : TranslatorClient {
 
     companion object {
+        private val logger = Logger.getLogger(GoogleTranslateClient::class.java)
         private const val QUERY = "q"
         private const val SOURCE_LANG = "sl"
         private const val TARGET_LANG = "tl"
@@ -30,10 +31,9 @@ class GoogleTranslateClient(
     }
 
     override fun translate(sentence: String, targetLanguage: CountryCode, sourceLanguage: CountryCode): Mono<String> {
-
         return webClient
                 .get()
-                .uri("https://translate.googleapis.com/translate_a/single?client=gtx" +
+                .uri("$url/translate_a/single?client=gtx" +
                         "&sl=${sourceLanguage.language}" +
                         "&tl=${targetLanguage.language}" +
                         "&dt=t" +
@@ -42,6 +42,10 @@ class GoogleTranslateClient(
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .flatMap(mapToMono())
+                .map( {
+                    println(it)
+                    println(it.indexOf("\","))
+                    it.substring(4, it.indexOf("\",\""))})
     }
 
     private fun addUserAgent(): (org.springframework.http.HttpHeaders) -> Unit {
@@ -50,23 +54,8 @@ class GoogleTranslateClient(
         }
     }
 
-    private fun mapToMono(): (ClientResponse) -> Mono<String> {
-        return {
-//            it.bodyToMono(Array<TranslationDto>::class.java)
-            it.bodyToMono(String::class.java)
-        }
-    }
+    private fun mapToMono(): (ClientResponse) -> Mono<String> = {
+        logger.info("$it")
+        it.bodyToMono(String::class.java) }
 
-    private fun getTranslation(): (Array<TranslationDto>) -> String = { it[0].inner[0].inner[0] }
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class TranslationDto(
-        val inner: List<Inner>,
-        val any: Any?,
-        val lang: Any?
-)
-
-data class Inner(
-        val inner: List<String>
-)

@@ -6,4 +6,4 @@ googleTranslateClient:
   socketTimeout: 2000
   maxConnectionsPerRoute: 5
   maxConnections: 10
-  url: 'https://translate.googleapis.com/translate_a/single'
+  url: 'https://translate.googleapis.com'

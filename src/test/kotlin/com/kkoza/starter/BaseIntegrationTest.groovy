@@ -1,5 +1,7 @@
 package com.kkoza.starter
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -19,4 +21,9 @@ class BaseIntegrationTest extends Specification {
     @Autowired
     ReactiveMongoTemplate reactiveMongoTemplate
 
+    @Rule
+    public WireMockRule translateGoogleRule = new WireMockRule(8089)
+
+
+    def stub
 }
