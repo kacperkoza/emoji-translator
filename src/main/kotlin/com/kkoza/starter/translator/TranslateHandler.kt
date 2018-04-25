@@ -1,6 +1,5 @@
 package com.kkoza.starter.translator
 
-import com.kkoza.starter.client.translator.googletranslate.GoogleTranslateClient
 import com.sun.istack.internal.logging.Logger
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -11,22 +10,29 @@ import reactor.core.publisher.Mono
 
 @Component
 class TranslateHandler(
-        private val googleTranslateClient: GoogleTranslateClient
+        private val emojiService: EmojiService
 ) {
 
     companion object {
-        private val logger = Logger.getLogger(GoogleTranslateClient::class.java)
+        private val logger = Logger.getLogger(TranslateHandler::class.java)
     }
 
     fun translate(request: ServerRequest): Mono<ServerResponse> {
-        val phrase = request.queryParam("phrase").orElse(null)
-        val countryCodeParam = request.queryParam("countryCode").orElse("pl")
-        val countryCode = CountryCode.valueOf(countryCodeParam.toUpperCase())
+        val phrase = readPhrase(request)
+        val countryCode = readCountryCode(request)
         logger.info("Get emoji for phrase = $phrase and countryCode = $countryCode")
         return ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(googleTranslateClient.translate(phrase, countryCode))
+                .body(emojiService.getTranslationFor(phrase, countryCode))
     }
+
+    private fun readCountryCode(request: ServerRequest): CountryCode {
+        val countryCodeParam = request.queryParam("countryCode").orElse("pl")
+        return CountryCode.valueOf(countryCodeParam.toUpperCase())
+    }
+
+    private fun readPhrase(request: ServerRequest) =
+            request.queryParam("phrase").orElse(null)
 
 }
