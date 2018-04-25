@@ -1,4 +1,4 @@
-package com.kkoza.starter.client.translator
+package com.kkoza.starter.client.emoji.emojipedia
 
 import io.netty.channel.ChannelOption
 import org.springframework.beans.factory.annotation.Value
@@ -9,15 +9,15 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.ipc.netty.resources.PoolResources
 
 @Configuration
-class GoogleTranslateConfiguration {
+class EmojipediaConfiguration {
 
     @Bean
-    fun googleTranslateWebClient(
-            @Value("\${googleTranslateClient.connectionTimeout}") connectionTimeout: Int,
-            @Value("\${googleTranslateClient.socketTimeout}") socketTimeout: Int,
-            @Value("\${googleTranslateClient.maxConnectionsPerRoute}") maxConnectionsPerRoute: Int,
-            @Value("\${googleTranslateClient.maxConnections}") maxConnections: Int,
-            @Value("\${googleTranslateClient.url}") url: String
+    fun emojipediaWebClient(
+            @Value("\${emojipediaClient.connectionTimeout}") connectionTimeout: Int,
+            @Value("\${emojipediaClient.socketTimeout}") socketTimeout: Int,
+            @Value("\${emojipediaClient.maxConnectionsPerRoute}") maxConnectionsPerRoute: Int,
+            @Value("\${emojipediaClient.maxConnections}") maxConnections: Int,
+            @Value("\${emojipediaClient.url}") url: String
 
     ): WebClient {
         val connector = ReactorClientHttpConnector({
@@ -27,7 +27,7 @@ class GoogleTranslateConfiguration {
                     .poolResources(PoolResources.fixed("pool", maxConnections))
         })
         return WebClient.builder()
-                .baseUrl("https://translate.googleapis.com/translate_a/single")
+                .baseUrl(url)
                 .clientConnector(connector)
                 .build()
     }

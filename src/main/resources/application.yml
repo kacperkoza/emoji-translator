@@ -2,8 +2,15 @@ application:
   name: starter
 
 googleTranslateClient:
+  url: 'https://translate.googleapis.com'
   connectionTimeout: 2000
   socketTimeout: 2000
   maxConnectionsPerRoute: 5
   maxConnections: 10
-  url: 'https://translate.googleapis.com'
+
+emojipediaClient:
+  url: 'https://emojipedia.org/'
+  connectionTimeout: 2000
+  socketTimeout: 2000
+  maxConnectionsPerRoute: 10
+  maxConnections: 10

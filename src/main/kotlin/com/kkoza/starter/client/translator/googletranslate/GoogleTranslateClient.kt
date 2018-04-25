@@ -1,21 +1,21 @@
-package com.kkoza.starter.client.translator
+package com.kkoza.starter.client.translator.googletranslate
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.google.common.net.HttpHeaders
+import com.kkoza.starter.client.translator.TranslatorClient
 import com.kkoza.starter.translator.CountryCode
 import com.sun.istack.internal.logging.Logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
-import kotlin.math.log
 
 
 @Component
 class GoogleTranslateClient(
-        private val webClient: WebClient,
+        @Qualifier("googleTranslateWebClient") private val webClient: WebClient,
         @Value("\${googleTranslateClient.url}") private val url: String
 ) : TranslatorClient {
 
@@ -31,21 +31,26 @@ class GoogleTranslateClient(
     }
 
     override fun translate(sentence: String, targetLanguage: CountryCode, sourceLanguage: CountryCode): Mono<String> {
-        return webClient
-                .get()
-                .uri("$url/translate_a/single?client=gtx" +
-                        "&sl=${sourceLanguage.language}" +
-                        "&tl=${targetLanguage.language}" +
-                        "&dt=t" +
-                        "&q=$sentence")
+        return webClient.get()
+                .uri("$url/translate_a/single" +
+                        "?$UNKNOWN" +
+                        "&$SOURCE_LANG=${sourceLanguage.language}" +
+                        "&$TARGET_LANG=${targetLanguage.language}" +
+                        "&$UNKNOWN_TWO" +
+                        "&$QUERY=$sentence")
                 .headers(addUserAgent())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .flatMap(mapToMono())
-                .map( {
-                    println(it)
-                    println(it.indexOf("\","))
-                    it.substring(4, it.indexOf("\",\""))})
+                .map(substringTranslation())
+    }
+
+    private fun substringTranslation(): (String) -> String {
+        return {
+            val startIndex = it.indexOf("\"") + 1
+            val endIndex = it.indexOf("\",")
+            it.substring(startIndex, endIndex)
+        }
     }
 
     private fun addUserAgent(): (org.springframework.http.HttpHeaders) -> Unit {
@@ -56,6 +61,7 @@ class GoogleTranslateClient(
 
     private fun mapToMono(): (ClientResponse) -> Mono<String> = {
         logger.info("$it")
-        it.bodyToMono(String::class.java) }
+        it.bodyToMono(String::class.java)
+    }
 
 }

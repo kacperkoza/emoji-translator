@@ -5,10 +5,14 @@ import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 import spock.lang.Specification
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 @ContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,6 +28,37 @@ class BaseIntegrationTest extends Specification {
     @Rule
     public WireMockRule translateGoogleRule = new WireMockRule(8089)
 
+    @Rule
+    public WireMockRule emojipediaRule = new WireMockRule(8091)
 
-    def stub
+    def stubGoogleTranslate() {
+        stubGoogleTranslate(200, "tv", "tv.json")
+    }
+
+    def stubGoogleTranslate(int statusCode, String phrase, String bodyFile) {
+        translateGoogleRule.stubFor(
+                get(urlPathMatching("/translate_a/single"))
+                        .withHeader(HttpHeaders.USER_AGENT, matching(".*"))
+                        .withQueryParam('q', equalTo(phrase))
+                        .withQueryParam('sl', equalTo('en'))
+                        .withQueryParam('tl', equalTo('pl'))
+                        .willReturn(
+                        aResponse()
+                                .withStatus(statusCode)
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBodyFile("google-translate/$bodyFile"))
+        )
+    }
+
+    def stubEmojipedia(int statusCode, String phrase, String bodyFile) {
+        translateGoogleRule.stubFor(
+                get(urlPathMatching("/$phrase/"))
+                        .willReturn(
+                        aResponse()
+                                .withStatus(statusCode)
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+                                .withBodyFile("emojipedia/$bodyFile"))
+        )
+    }
+
 }
