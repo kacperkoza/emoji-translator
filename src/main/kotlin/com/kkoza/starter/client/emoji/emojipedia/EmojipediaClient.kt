@@ -1,6 +1,7 @@
 package com.kkoza.starter.client.emoji.emojipedia
 
 import com.kkoza.starter.client.emoji.EmojiClient
+import com.sun.istack.internal.logging.Logger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -14,17 +15,17 @@ class EmojipediaClient(
         @Value("\${emojipediaClient.url}") private val url: String
 ) : EmojiClient {
 
-    override fun getEnglishSentenceFromEmoji(emoji: String): Mono<String> {
-        return webClient.get()
-                .uri { it.path("/$emoji/").build() }
-                .accept(MediaType.TEXT_PLAIN)
-                .exchange()
-                .flatMap { it.bodyToMono(String::class.java) }
-                .map { fetchEmojiDesc(it) }
+    companion object {
+        private val logger = Logger.getLogger(EmojipediaClient::class.java)
     }
 
-    private fun fetchEmojiDesc(it: String): String {
-        return it
+    override fun getEnglishSentenceFromEmoji(emoji: String): Mono<String> {
+        logger.info("Get emoji translation for ${emoji}")
+        return webClient.get()
+                .uri("https://emojipedia.org/${emoji[0]}${emoji[1]}/")
+                .exchange()
+                .flatMap {
+                    it.bodyToMono(String::class.java) }
     }
 
 }
