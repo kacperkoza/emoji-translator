@@ -1,7 +1,6 @@
 package com.kkoza.starter.translator
 
 import com.vdurmont.emoji.EmojiManager
-import emoji4j.EmojiUtils
 import org.springframework.stereotype.Component
 
 @Component
@@ -10,28 +9,62 @@ class PhraseResolver {
     fun convertEmojisInPhraseToEnglish(phrase: String): String {
         val words = phrase.split(" ")
         val builder = StringBuilder()
-        words.forEachIndexed { index, word ->
-            var emojiFound = false
-            for (i in 0 until word.length) {
-                var i = if (emojiFound) {
-                    emojiFound = false
-                    val new = i + 1
-                    if (new == word.length - 2 || new == word.length - 1) continue else new
+        words.forEach { word ->
+            var i = 0
+            while (i < word.length) {
+                val byte = word.getByte(i)
+                if (isEmoji(byte)) {
+                    builder.appendWithLeadingSpaceForNonZeroIndex(i, byte)
+                    i++
+                    continue
+                } else if (word.isLastIndex(i)) {
+                    builder.append(byte)
+                    break
                 } else {
-                    i
+                    val twoBytes = word.getTwoBytes(i)
+                    if (isEmoji(twoBytes)) {
+                        builder.appendWithLeadingSpaceForNonZeroIndex(i, twoBytes)
+                        i += 2
+                    } else {
+                        if (builder.isLastEmoji(i)) {
+                            builder.appendWithLeadingSpace(word[i].toString())
+                        } else {
+                            builder.append(word[i])
+                        }
+                        i++
+                    }
                 }
-                if (i > word.length - 1) continue
-                val twoBytes = if (i + 2 <= word.length) word.substring(i, i + 2) else word.substring(i - 2, i - 1)
-                if (EmojiManager.isEmoji(twoBytes)) {
-                    if (i == 0) builder.append(twoBytes) else builder.append(" $twoBytes")
-                    emojiFound = true
-                } else {
-                    builder.append(word[i])
-                }
-
             }
             builder.append(" ")
         }
         return builder.trim().toString()
     }
+
+    private fun StringBuilder.isLastEmoji(i: Int): Boolean {
+        if (i in 0..2) return false
+        return EmojiManager.isEmoji(this.substring(this.length - 2, this.length)) //for 2 byte
+                || EmojiManager.isEmoji(this.substring(this.length - 1, this.length)) // for 1 byte
+
+    }
+
+    private fun isEmoji(string: String) = EmojiManager.isEmoji(string)
+
+    private fun String.getByte(index: Int) = this.substring(index, index + 1)
+
+    private fun String.getTwoBytes(index: Int) = this.substring(index, index + 2)
+
+    private fun String.isLastIndex(index: Int) = this.length - 1 == index
+
+    private fun StringBuilder.appendWithLeadingSpaceForNonZeroIndex(index: Int, string: String) {
+        if (index == 0) {
+            this.append(string)
+        } else {
+            this.append(" $string")
+        }
+    }
+
+    private fun StringBuilder.appendWithLeadingSpace(string: String) {
+        this.append(" $string")
+    }
+
 }
