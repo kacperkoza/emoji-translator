@@ -4,9 +4,9 @@ import com.vdurmont.emoji.EmojiManager
 import org.springframework.stereotype.Component
 
 @Component
-class PhraseResolver {
+class EmojiSentenceSeparator {
 
-    fun convertEmojisInPhraseToEnglish(phrase: String): String {
+    fun seperateEmojisWithSpaces(phrase: String): List<String> {
         val words = phrase.split(" ")
         val builder = StringBuilder()
         words.forEach { word ->
@@ -27,7 +27,7 @@ class PhraseResolver {
                         i += 2
                     } else {
                         if (builder.isLastEmoji(i)) {
-                            builder.appendWithLeadingSpace(word[i].toString())
+                            builder.appendWithLeadingSpace(word[i])
                         } else {
                             builder.append(word[i])
                         }
@@ -37,12 +37,12 @@ class PhraseResolver {
             }
             builder.append(" ")
         }
-        return builder.trim().toString()
+        return builder.trim().toString().split(" ")
     }
 
     private fun StringBuilder.isLastEmoji(i: Int): Boolean {
         if (i in 0..2) return false
-        return EmojiManager.isEmoji(this.substring(this.length - 2, this.length)) //for 2 byte
+        return EmojiManager.isEmoji(this.substring(this.length - 2, this.length)) // for 2 byte
                 || EmojiManager.isEmoji(this.substring(this.length - 1, this.length)) // for 1 byte
 
     }
@@ -63,8 +63,8 @@ class PhraseResolver {
         }
     }
 
-    private fun StringBuilder.appendWithLeadingSpace(string: String) {
-        this.append(" $string")
-    }
+    private fun StringBuilder.appendWithLeadingSpace(char: Char) = this.appendWithLeadingSpace(char.toString())
+
+    private fun StringBuilder.appendWithLeadingSpace(string: String) = this.append(" $string")
 
 }

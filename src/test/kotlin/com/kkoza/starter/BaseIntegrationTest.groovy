@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -21,9 +20,6 @@ class BaseIntegrationTest extends Specification {
 
     @Autowired
     WebTestClient webTestClient
-
-    @Autowired
-    ReactiveMongoTemplate reactiveMongoTemplate
 
     @Rule
     public WireMockRule translateGoogleRule = new WireMockRule(8089)
@@ -42,6 +38,8 @@ class BaseIntegrationTest extends Specification {
                         .withQueryParam('q', equalTo(phrase))
                         .withQueryParam('sl', equalTo('en'))
                         .withQueryParam('tl', equalTo('pl'))
+                        .withQueryParam('client', equalTo('gtx'))
+                        .withQueryParam('dt', equalTo('t'))
                         .willReturn(
                         aResponse()
                                 .withStatus(statusCode)
