@@ -37,7 +37,7 @@ class GoogleTranslateClient(
                         "&$SOURCE_LANG=${sourceLanguage.language}" +
                         "&$TARGET_LANG=${targetLanguage.language}" +
                         "&$UNKNOWN_TWO" +
-                        "&$QUERY=$sentence")
+                        "&$QUERY=${sentence.trim()}")
                 .headers(addUserAgent())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

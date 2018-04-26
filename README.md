@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kacperkoza/emoji-translator.svg?branch=master)](https://travis-ci.org/kacperkoza/emoji-translator)
+
 # Reactive Spring Boot starter
 Configured Reactive Spring Boot application for further development in Kotlin:
 - MongoDB (fakeMongo, EmbeddedMongo)

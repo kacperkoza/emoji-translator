@@ -3,14 +3,14 @@ package com.kkoza.starter.translator
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class PhraseResolverTest extends Specification {
+class EmojiSentenceSeparatorTest extends Specification {
 
-    def resolver = new PhraseResolver()
+    def separator = new EmojiSentenceSeparator()
 
     @Unroll
-    def 'should seperate emojis'() {
+    def 'should seperate emojis close to other emoji/text with space'() {
         when:
-        def divided = resolver.convertEmojisInPhraseToEnglish(inputPhrase)
+        def divided = separator.seperateEmojisWithSpaces(inputPhrase)
 
         then:
         divided == expected
