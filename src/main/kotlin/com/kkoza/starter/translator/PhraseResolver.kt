@@ -10,32 +10,28 @@ class PhraseResolver {
         val words = phrase.split(" ")
         val builder = StringBuilder()
         words.forEach { word ->
-            var emojiFound = false
-            for (i in 0 until word.length) {
-                var i = if (emojiFound) {
-                    emojiFound = false
-                    val new = i + 1
-                    if (new == word.length - 2 || new == word.length - 1) continue else new
-                } else {
-                    i
-                }
-                if (indexExceededLength(i, word)) continue
-
+            var i = 0
+            while (i < word.length) {
                 val byte = word.getByte(i)
                 if (isEmoji(byte)) {
                     builder.appendWithLeadingSpaceForNonZeroIndex(i, byte)
+                    i++
                     continue
+                } else if (word.isLastIndex(i)) {
+                    builder.append(byte)
+                    break
                 } else {
-                    if (word.isLastIndex(i)) {
-                        builder.append(byte)
-                        continue
-                    }
                     val twoBytes = word.getTwoBytes(i)
                     if (isEmoji(twoBytes)) {
                         builder.appendWithLeadingSpaceForNonZeroIndex(i, twoBytes)
-                        emojiFound = true
+                        i += 2
                     } else {
-                        builder.append(word[i])
+                        if (builder.isLastEmoji(i)) {
+                            builder.appendWithLeadingSpace(word[i].toString())
+                        } else {
+                            builder.append(word[i])
+                        }
+                        i++
                     }
                 }
             }
@@ -44,7 +40,12 @@ class PhraseResolver {
         return builder.trim().toString()
     }
 
-    private fun indexExceededLength(i: Int, word: String) = i > word.length - 1
+    private fun StringBuilder.isLastEmoji(i: Int): Boolean {
+        if (i in 0..2) return false
+        return EmojiManager.isEmoji(this.substring(this.length - 2, this.length)) //for 2 byte
+                || EmojiManager.isEmoji(this.substring(this.length - 1, this.length)) // for 1 byte
+
+    }
 
     private fun isEmoji(string: String) = EmojiManager.isEmoji(string)
 
@@ -62,4 +63,10 @@ class PhraseResolver {
         }
     }
 
+    private fun StringBuilder.appendWithLeadingSpace(string: String) {
+        this.append(" $string")
+    }
+
 }
+
+
