@@ -16,8 +16,9 @@ class EmojiSentenceSeparatorTest extends Specification {
         divided == expected
 
         where:
-        inputPhrase                              | expected
-        "elo😃delo😃😃 ale jest😃 😃 smiesznie" | "elo 😃 delo 😃 😃 ale jest 😃 😃 smiesznie"
-        "elo⚽⚽co tam mi ⚽⚽ powiesz⚽ "            | "elo ⚽ ⚽ co tam mi ⚽ ⚽ powiesz ⚽"
+        inputPhrase                             | expected
+        "elo😃delo😃😃 ale jest😃 😃 smiesznie"  | ["elo", "😃", "delo", "😃", "😃", "ale", "jest", "😃", "😃", "smiesznie"]
+        "elo⚽⚽co tam mi ⚽⚽ powiesz⚽ "       | ["elo", "⚽", "⚽", "co", "tam", "mi", "⚽", "⚽", "powiesz", "⚽"]
     }
+
 }

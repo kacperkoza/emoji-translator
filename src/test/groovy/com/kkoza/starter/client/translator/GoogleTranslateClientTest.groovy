@@ -3,7 +3,6 @@ package com.kkoza.starter.client.translator
 import com.kkoza.starter.BaseIntegrationTest
 import com.kkoza.starter.client.translator.googletranslate.GoogleTranslateClientException
 import com.kkoza.starter.translator.CountryCode
-import org.junit.Ignore
 import org.springframework.beans.factory.annotation.Autowired
 
 class GoogleTranslateClientTest extends BaseIntegrationTest {
@@ -13,20 +12,19 @@ class GoogleTranslateClientTest extends BaseIntegrationTest {
 
     def 'should return translation for given phrase and country codes'() {
         given:
-        def phrase = "tv"
-        stubGoogleTranslate(200, phrase, "tv.json")
+        stubGoogleTranslate(200, 'tv', "tv.json")
+        Thread.sleep(1000)
 
         expect:
-        client.translate(phrase, CountryCode.PL, CountryCode.EN).block() == 'telewizja'
+        client.translate('tv', CountryCode.PL, CountryCode.EN).block() == 'telewizja'
     }
 
-    @Ignore //TODO: throw exception (?)
-    def 'should throw google translate client exception when service return 500 status'() {
+    def 'should throw "GoogleTranslateClientException" when service return 500 status'() {
         given:
-        stubGoogleTranslate(500, 'phrase', "tv.json")
+        stubGoogleTranslate(500, 'tv', 'error.json')
 
         when:
-        client.translate('phrase', CountryCode.PL, CountryCode.EN).block()
+        client.translate('tv', CountryCode.PL, CountryCode.EN).block()
 
         then:
         thrown(GoogleTranslateClientException.class)

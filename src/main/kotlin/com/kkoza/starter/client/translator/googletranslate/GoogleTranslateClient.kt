@@ -1,17 +1,17 @@
 package com.kkoza.starter.client.translator.googletranslate
 
-import com.google.common.net.HttpHeaders
 import com.kkoza.starter.client.translator.TranslatorClient
 import com.kkoza.starter.translator.CountryCode
 import com.sun.istack.internal.logging.Logger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
-
 
 @Component
 class GoogleTranslateClient(
@@ -40,28 +40,34 @@ class GoogleTranslateClient(
                         "&$QUERY=${sentence.trim()}")
                 .headers(addUserAgent())
                 .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .flatMap(mapToMono())
-                .map(substringTranslation())
+                .retrieve()
+                .onStatus(is5xxServerError(), googleTranslateClientException(sentence, targetLanguage, sourceLanguage))
+                .bodyToMono(String::class.java)
+                .map(subStringTranslation())
+
     }
 
-    private fun substringTranslation(): (String) -> String {
-        return {
-            val startIndex = it.indexOf("\"") + 1
-            val endIndex = it.indexOf("\",")
-            it.substring(startIndex, endIndex)
-        }
-    }
-
-    private fun addUserAgent(): (org.springframework.http.HttpHeaders) -> Unit {
+    private fun addUserAgent(): (HttpHeaders) -> Unit {
         return {
             it.add(HttpHeaders.USER_AGENT, USER_AGENT_VALUE)
         }
     }
 
-    private fun mapToMono(): (ClientResponse) -> Mono<String> = {
-        logger.info("$it")
-        it.bodyToMono(String::class.java)
+    private fun is5xxServerError(): (HttpStatus) -> Boolean = { it.is5xxServerError }
+
+    private fun googleTranslateClientException(sentence: String, targetLanguage: CountryCode, sourceLanguage: CountryCode): (ClientResponse) -> Mono<Throwable> {
+        return {
+            logger.warning("Google translate server error")
+            Mono.error(GoogleTranslateClientException(sentence, targetLanguage, sourceLanguage))
+        }
+    }
+
+    private fun subStringTranslation(): (String) -> String {
+        return {
+            val startIndex = it.indexOf("\"") + 1
+            val endIndex = it.indexOf("\",")
+            it.substring(startIndex, endIndex)
+        }
     }
 
 }

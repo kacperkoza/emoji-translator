@@ -1,6 +1,7 @@
 package com.kkoza.starter
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import org.junit.ClassRule
 import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,7 +16,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 @ContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["integration"])
+@ActiveProfiles(profiles = ['integration'])
 class BaseIntegrationTest extends Specification {
 
     @Autowired
@@ -28,13 +29,13 @@ class BaseIntegrationTest extends Specification {
     public WireMockRule emojipediaRule = new WireMockRule(8091)
 
     def stubGoogleTranslate() {
-        stubGoogleTranslate(200, "tv", "tv.json")
+        stubGoogleTranslate(200, 'tv', 'tv.json')
     }
 
-    def stubGoogleTranslate(int statusCode, String phrase, String bodyFile) {
-        translateGoogleRule.stubFor(
-                get(urlPathMatching("/translate_a/single"))
-                        .withHeader(HttpHeaders.USER_AGENT, matching(".*"))
+    def stubGoogleTranslate(int statusCode, String phrase = 'tv', String bodyFile = 'tv.json') {
+        stubFor(
+                get(urlPathMatching('/translate_a/single'))
+                        .withHeader(HttpHeaders.USER_AGENT, matching('.*'))
                         .withQueryParam('q', equalTo(phrase))
                         .withQueryParam('sl', equalTo('en'))
                         .withQueryParam('tl', equalTo('pl'))
@@ -49,7 +50,7 @@ class BaseIntegrationTest extends Specification {
     }
 
     def stubEmojipedia(int statusCode, String phrase, String bodyFile) {
-        translateGoogleRule.stubFor(
+        stubFor(
                 get(urlPathMatching("/$phrase/"))
                         .willReturn(
                         aResponse()
