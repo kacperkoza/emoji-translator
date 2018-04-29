@@ -57,11 +57,11 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 	compile group: 'com.kcthota', name: 'emoji4j', version: '4.0'
 	compile 'com.vdurmont:emoji-java:4.0.0'
+	compile group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('io.projectreactor:reactor-test')
 	testCompile 'org.spockframework:spock-spring:1.0-groovy-2.4'
 	testCompile('cglib:cglib-nodep:3.2.2')
 	testCompile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '1.2.4.RELEASE'
-//	testCompile ('com.github.tomakehurst:wiremock:2.17.0')
 }

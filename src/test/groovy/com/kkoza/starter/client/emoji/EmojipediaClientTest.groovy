@@ -11,16 +11,21 @@ class EmojipediaClientTest extends BaseIntegrationTest {
 
     def "get english phrase for grapes emoji"() {
         given:
-        def grapes = 'gra'
-        stubEmojipedia(200, grapes, 'grapes.html')
+        def grapesEmoji = '🍇'
+        stubEmojipediaForRedirect('%F0%9F%8D%87', 'grapes') // 🍇 is %F0%9F%8D%87 in bytes
+        stubEmojipedia(200, 'grapes', 'grapes.html')
 
         expect:
-        emojiClient.getEnglishSentenceFromEmoji(grapes).block() == 'Grapes'
+        with(emojiClient.getEnglishSentenceFromEmoji(grapesEmoji).block()) {
+            emoji == '🍇'
+            english == 'Grapes'
+            description == 'Grapes that are commonly found as red grapes (purple-colored) or ' +
+                    'white grapes (green-colored). Used to create wine.'
+        }
     }
 
-    @Ignore //TODO throw exception ?
-    def 'should throw EmojipediaClientException when emojipedia returns status 500'() {
-
+    @Ignore //TODO: how to handle exceptions
+    def 'should throw EmojipediaClientException when emojipedia returns status 5xx or 4xx'() {
     }
 
 }
