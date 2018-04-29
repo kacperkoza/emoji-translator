@@ -33,7 +33,7 @@ class BaseIntegrationTest extends Specification {
     }
 
     def stubGoogleTranslate(int statusCode, String phrase = 'tv', String bodyFile = 'tv.json') {
-        stubFor(
+        translateGoogleRule.stubFor(
                 get(urlPathMatching('/translate_a/single'))
                         .withHeader(HttpHeaders.USER_AGENT, matching('.*'))
                         .withQueryParam('q', equalTo(phrase))
@@ -49,9 +49,20 @@ class BaseIntegrationTest extends Specification {
         )
     }
 
-    def stubEmojipedia(int statusCode, String phrase, String bodyFile) {
-        stubFor(
-                get(urlPathMatching("/$phrase/"))
+    def stubEmojipediaForRedirect(String phrase, String locationHeaderValue) {
+        emojipediaRule.stubFor(
+                get(urlPathMatching("/$phrase"))
+                        .willReturn(
+                        aResponse()
+                                .withStatus(301)
+                                .withHeader(HttpHeaders.LOCATION, "/$locationHeaderValue")
+                )
+        )
+    }
+
+    def stubEmojipedia(int statusCode, String phrase = 'grapes', String bodyFile = 'grapes.html') {
+        emojipediaRule.stubFor(
+                get(urlPathMatching("/$phrase"))
                         .willReturn(
                         aResponse()
                                 .withStatus(statusCode)

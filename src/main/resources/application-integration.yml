@@ -5,3 +5,7 @@ local:
 
 googleTranslateClient:
   url: 'http://localhost:8089/'
+
+
+emojipediaClient:
+  url: 'http://localhost:8091/'
